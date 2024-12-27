@@ -1,10 +1,13 @@
-FROM python:3.9.10-slim
+FROM python:3.12
+LABEL org.opencontainers.image.source=https://github.com/AlignmentResearch/aim
 
-ARG AIM_VERSION
-RUN pip install Cython==3.0.10
-RUN pip install aim==$AIM_VERSION
+RUN apt-get update && apt-get install -y g++ \
+    && rm -rf /var/lib/apt/lists/*
 
+COPY . /opt/aim
 WORKDIR /opt/aim
-RUN aim init
+RUN pip install Cython==3.0.10 psycopg2 -r requirements.txt \
+    && rm -rf ~/.cache/pip
+
 ENTRYPOINT ["aim"]
-CMD ["up"]
+CMD ["--help"]
