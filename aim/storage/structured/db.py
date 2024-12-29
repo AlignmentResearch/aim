@@ -46,7 +46,7 @@ class ObjectCache:
 
 
 class DB(ObjectFactory):
-    _DB_NAME = 'run_metadata'
+    _DB_NAME = 'app'
     _DEFAULT_PORT = 5432
     _pool = WeakValueDictionary()
 
@@ -57,7 +57,8 @@ class DB(ObjectFactory):
         import logging
 
         super().__init__()
-        self.path = self._DB_NAME
+        pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']
+        self.path = pg_dbname
         self.db_url = self.get_db_url(self.path)
         self.readonly = readonly
         self.engine = create_engine(
@@ -78,7 +79,8 @@ class DB(ObjectFactory):
 
     @staticmethod
     def get_default_url():
-        return DB.get_db_url('.aim')
+        pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']
+        return DB.get_db_url(pg_dbname)
 
     @staticmethod
     def get_db_url(path: str) -> str:
