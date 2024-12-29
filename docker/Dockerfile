@@ -6,11 +6,13 @@ RUN apt-get update && apt-get install -y g++ nodejs npm \
 RUN pip install Cython==3.0.10 psycopg2 \
     && rm -rf ~/.cache/pip
 
-COPY ./aim/web/ui /opt/aim/web/ui
-WORKDIR /opt/aim/web/ui
-RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
+# Build web UI -- time-consuming and unlikely to be modified
+WORKDIR /workspace/aim/web/ui
+COPY ./aim/web/ui .
+RUN npm install && NODE_OPTIONS=--openssl-legacy-provider npm run build
 
-WORKDIR /opt/aim
+# install Python dependencies
+WORKDIR /workspace
 COPY . .
 RUN pip install -r requirements.txt \
     && rm -rf ~/.cache/pip
