@@ -12,6 +12,7 @@ from aim.web.configs import AIM_LOG_LEVEL_KEY
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+import aim.storage.utils.drop_table_cascade  # noqa: F401
 
 class ObjectCache:
     def __init__(self, data_fetch_func, key_func):
