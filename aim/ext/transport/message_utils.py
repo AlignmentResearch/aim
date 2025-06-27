@@ -5,7 +5,8 @@ import struct
 from typing import Iterator, Tuple
 
 from aim.storage.object import CustomObject
-from aim.storage.treeutils import decode_tree, encode_tree  # noqa
+from aim.storage.treeutils import decode_tree as decode_tree
+from aim.storage.treeutils import encode_tree as encode_tree
 from aim.storage.types import BLOB
 
 
@@ -45,28 +46,23 @@ def pack_stream(tree: Iterator[Tuple[bytes, bytes]]) -> bytes:
             yield struct.pack('I', len(key)) + key + struct.pack('?', True) + struct.pack('I', len(val)) + val
 
 
-def unpack_helper(msg: bytes) -> Tuple[bytes, bytes]:
-    (key_size,), tail = struct.unpack('I', msg[:4]), msg[4:]
-    key, tail = tail[:key_size], tail[key_size:]
-    (is_blob,), tail = struct.unpack('?', tail[:1]), tail[1:]
-    (value_size,), tail = struct.unpack('I', tail[:4]), tail[4:]
-    value, tail = tail[:value_size], tail[value_size:]
-    assert len(tail) == 0
-    if is_blob:
-        yield key, BLOB(data=value)
-    else:
-        yield key, value
-
-
 def unpack_stream(stream) -> Tuple[bytes, bytes]:
     for msg in stream:
-        yield from unpack_helper(msg)
+        yield from unpack_args(msg)
 
 
 def raise_exception(server_exception):
+    from filelock import Timeout
+
     module = importlib.import_module(server_exception.get('module_name'))
     exception = getattr(module, server_exception.get('class_name'))
     args = json.loads(server_exception.get('args') or [])
+    message = server_exception.get('message')
+
+    # special handling for lock timeouts as they require lock argument which can't be passed over the network
+    if exception == Timeout:
+        raise Exception(message)
+
     raise exception(*args) if args else exception()
 
 
@@ -75,6 +71,7 @@ def build_exception(exception: Exception):
         'module_name': exception.__class__.__module__,
         'class_name': exception.__class__.__name__,
         'args': json.dumps(exception.args),
+        'message': str(exception),
     }
 
 

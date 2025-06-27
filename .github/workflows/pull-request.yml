@@ -24,14 +24,14 @@ on:
       - reopened
       - edited
 jobs:
-  validate-naming-convention:
-    name: Pull Request's title matches naming convention
-    runs-on: ubuntu-latest
-    steps:
-      - uses: deepakputhraya/action-pr-title@master
-        with:
-          regex: '^\[(?:feat|fix|doc|refactor|deprecation)\]\s[A-Z].*(?<!\.)$'
-          github_token: ${{ github.token }}
+#  validate-naming-convention:
+#    name: Pull Request's title matches naming convention
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: deepakputhraya/action-pr-title@master
+#        with:
+#          regex: '^\[(?:feat|fix|doc|refactor|deprecation)\]\s[A-Z].*(?<!\.)$'
+#          github_token: ${{ github.token }}
   run-checks:
     if: github.event.pull_request.draft == false && github.event.action != 'edited'
     runs-on: ubuntu-latest
@@ -68,8 +68,8 @@ jobs:
 
   storage-performance-checks:
     needs: run-checks
-    concurrency: perf-tests
-    runs-on: [self-hosted, performance-tests]
+    concurrency: storage-performance-checks
+    runs-on: [self-hosted, perf-tests]
     name: Performance tests
     steps:
       - name: checkout

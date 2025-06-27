@@ -11,7 +11,9 @@ from aim.cli.utils import (
     get_repo_instance,
     set_log_level,
 )
+from aim.sdk.index_manager import RepoIndexManager
 from aim.sdk.repo import Repo
+from aim.sdk.run_status_manager import RunStatusManager
 from aim.sdk.utils import clean_repo_path
 from aim.web.configs import (
     AIM_ENV_MODE_KEY,
@@ -29,7 +31,7 @@ from aim.web.configs import (
 @click.command()
 @click.option('-h', '--host', default=AIM_UI_DEFAULT_HOST, type=str)
 @click.option('-p', '--port', default=AIM_UI_DEFAULT_PORT, type=int)
-@click.option('-w', '--workers', default=1, type=int)
+@click.option('-w', '--workers', default=2, type=int)
 @click.option('--uds', required=False, type=click.Path(exists=False, file_okay=True, dir_okay=False, readable=True))
 @click.option('--repo', required=False, type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
 @click.option('--tf_logs', type=click.Path(exists=True, readable=True))
@@ -96,7 +98,7 @@ def up(
         db_cmd = build_db_upgrade_command()
         exec_cmd(db_cmd, stream_output=True)
     except ShellCommandException:
-        click.echo('Failed to initialize Aim DB. ' 'Please see the logs above for details.')
+        click.echo('Failed to initialize Aim DB. Please see the logs above for details.')
         return
 
     if port == 0:
@@ -122,6 +124,11 @@ def up(
     if profiler:
         os.environ[AIM_PROFILER_KEY] = '1'
 
+    index_mng = RepoIndexManager.get_index_manager(repo_inst)
+    index_mng.start()
+
+    run_status_mng = RunStatusManager(repo_inst)
+    run_status_mng.start()
     try:
         server_cmd = build_uvicorn_command(
             'aim.web.run:app',
