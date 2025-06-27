@@ -12,7 +12,8 @@ from aim.web.configs import AIM_LOG_LEVEL_KEY
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-import aim.storage.drop_table_cascade  # noqa: F401
+if os.environ.get("AIM_USE_PG", False): 
+    import aim.storage.drop_table_cascade  # noqa: F401
 
 class ObjectCache:
     def __init__(self, data_fetch_func, key_func):
@@ -47,8 +48,6 @@ class ObjectCache:
 
 
 class DB(ObjectFactory):
-    _DB_NAME = 'app'
-    _DEFAULT_PORT = 5432
     _pool = WeakValueDictionary()
 
     _caches = dict()
@@ -57,17 +56,25 @@ class DB(ObjectFactory):
     def __init__(self, path: str, readonly: bool = False):
         import logging
 
-        super().__init__()
-        pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']
-        self.path = pg_dbname
-        self.db_url = self.get_db_url(self.path)
+        super().__init__()        
+        if os.environ.get("AIM_USE_PG", False):
+            self.path = os.environ['AIM_PG_DBNAME_RUNS']
+            engine_options = {
+                "pool_pre_ping": True,
+            }
+        else:
+            self.path = path
+            engine_options = {
+                "pool_size": 10,
+                "max_overflow": 20,
+            }
+            
+        self.db_url = self.get_db_url(self.path)        
         self.readonly = readonly
         self.engine = create_engine(
             self.db_url,
             echo=(logging.INFO >= int(os.environ.get(AIM_LOG_LEVEL_KEY, logging.WARNING))),
-            pool_pre_ping=True
-            # pool_size=10,
-            # max_overflow=20,
+            **engine_options,
         )
         event.listen(self.engine, 'connect', lambda c, _: c.execute('pragma foreign_keys=on'))
         self.session_cls = scoped_session(sessionmaker(autoflush=False, bind=self.engine))
@@ -82,18 +89,26 @@ class DB(ObjectFactory):
         return db
 
     @staticmethod
-    def get_default_url():
-        pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']
-        return DB.get_db_url(pg_dbname)
+    def get_default_url():        
+        return DB.get_db_url(".aim")
 
     @staticmethod
     def get_db_url(path: str) -> str:
-        pg_user = os.environ['AIM_PG_USER']
-        pg_password = os.environ['AIM_PG_PASSWORD']
-        pg_host = os.environ['AIM_PG_HOST']
-        pg_port = os.environ['AIM_PG_PORT']
+        if os.environ.get("AIM_USE_PG", False):
+            pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']        
+            pg_user = os.environ['AIM_PG_USER']
+            pg_password = os.environ['AIM_PG_PASSWORD']
+            pg_host = os.environ['AIM_PG_HOST']
+            pg_port = os.environ['AIM_PG_PORT']
+            db_url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_dbname}"
+        else:
+            db_dialect = "sqlite"
+            db_name = "run_metadata.sqlite"
+            if os.path.exists(path):
+                db_url = f'{db_dialect}:///{path}/{db_name}'
+            else:
+                raise RuntimeError(f'Cannot find database {path}. Please init first.')
 
-        db_url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{path}"
         return db_url
 
     @property
