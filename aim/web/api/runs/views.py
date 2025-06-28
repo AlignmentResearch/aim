@@ -1,4 +1,6 @@
 from typing import Optional, Tuple
+import os
+import pathlib
 
 from aim.sdk.types import QueryReportMode
 from aim.web.api.runs.object_views import (
@@ -49,7 +51,7 @@ from aim.web.api.utils import (
     object_factory,
 )
 from fastapi import Depends, Header, HTTPException, Query
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from starlette import status
 
 
@@ -367,6 +369,38 @@ async def get_log_records_api(run_id: str, record_range: Optional[str] = ''):
     run = get_run_or_404(run_id, repo=repo)
 
     return StreamingResponse(run_log_records_streamer(run, record_range))
+
+
+@runs_router.get('/{run_id}/artifacts/{artifact_name}/')
+async def get_artifact_file_api(run_id: str, artifact_name: str):
+    """Serve artifact files for a specific run."""
+    repo = get_project_repo()
+    run = get_run_or_404(run_id, repo=repo)
+    
+    # Find the artifact by name
+    artifacts = run.artifacts
+    if artifact_name not in artifacts:
+        raise HTTPException(status_code=404, detail=f"Artifact '{artifact_name}' not found")
+    
+    artifact = artifacts[artifact_name]
+    file_path = artifact.path
+    
+    # Verify the file exists and is accessible
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"Artifact file not found at path: {file_path}")
+    
+    # Security check: ensure the file is within reasonable bounds
+    try:
+        file_path = os.path.abspath(file_path)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    
+    # Return the file
+    return FileResponse(
+        path=file_path,
+        filename=artifact_name,
+        media_type='application/octet-stream'
+    )
 
 
 def add_api_routes():
