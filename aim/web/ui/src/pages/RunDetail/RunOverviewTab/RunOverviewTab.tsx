@@ -11,6 +11,7 @@ import * as analytics from 'services/analytics';
 import GitInfoCard from './components/GitInfoCard';
 import RunOverviewTabMetricsCard from './components/MetricsCard/RunOverviewTabMetricsCard';
 import RunOverviewTabArtifactsCard from './components/ArtifactsCard/RunOverviewTabArtifactsCard';
+import RunOverviewTabCSVTablesCard from './components/CSVTablesCard/RunOverviewTabCSVTablesCard';
 import RunOverviewTabPackagesCard from './components/Packages/RunOverviewTabPackagesCard';
 import RunOverviewTabParamsCard from './components/ParamsCard/RunOverviewTabParamsCard';
 import RunOverviewSidebar from './components/RunOverviewSidebar/RunOverviewSidebar';
@@ -108,6 +109,14 @@ function RunOverviewTab({ runData, runHash }: IRunOverviewTabProps) {
                     isLoading={runData?.isRunBatchLoading}
                     type='systemMetric'
                     runBatch={cardsData?.runSystemBatch}
+                  />
+                </ErrorBoundary>
+              )}
+              {_.isEmpty(cardsData.artifacts) ? null : (
+                <ErrorBoundary>
+                  <RunOverviewTabCSVTablesCard
+                    artifacts={cardsData.artifacts}
+                    isRunInfoLoading={runData?.isRunInfoLoading}
                   />
                 </ErrorBoundary>
               )}
