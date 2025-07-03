@@ -9,14 +9,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-if os.environ.get("AIM_USE_PG", False): 
+
+if os.environ.get('AIM_USE_PG', False):
     import aim.storage.drop_table_cascade  # noqa: F401
+
     engine_options = {}
 else:
     engine_options = {
-        "connect_args": {"check_same_thread": False},
-        "pool_size": 10,
-        "max_overflow": 20,
+        'connect_args': {'check_same_thread': False},
+        'pool_size': 10,
+        'max_overflow': 20,
     }
 
 

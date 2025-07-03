@@ -1,7 +1,8 @@
-from sqlalchemy.schema import DropTable
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.schema import DropTable
 
-@compiles(DropTable, "postgresql")
+
+@compiles(DropTable, 'postgresql')
 def _compile_drop_table(element, compiler, **kwargs):
     """
     Ensures tables are dropped with CASCADE in PostgreSQL.
@@ -17,4 +18,4 @@ def _compile_drop_table(element, compiler, **kwargs):
     Returns:
         str: The SQL DROP TABLE command with CASCADE
     """
-    return compiler.visit_drop_table(element) + " CASCADE"
+    return compiler.visit_drop_table(element) + ' CASCADE'

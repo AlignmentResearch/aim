@@ -12,8 +12,10 @@ from aim.web.configs import AIM_LOG_LEVEL_KEY
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-if os.environ.get("AIM_USE_PG", False): 
+
+if os.environ.get('AIM_USE_PG', False):
     import aim.storage.drop_table_cascade  # noqa: F401
+
 
 class ObjectCache:
     def __init__(self, data_fetch_func, key_func):
@@ -56,20 +58,20 @@ class DB(ObjectFactory):
     def __init__(self, path: str, readonly: bool = False):
         import logging
 
-        super().__init__()        
-        if os.environ.get("AIM_USE_PG", False):
+        super().__init__()
+        if os.environ.get('AIM_USE_PG', False):
             self.path = os.environ['AIM_PG_DBNAME_RUNS']
             engine_options = {
-                "pool_pre_ping": True,
+                'pool_pre_ping': True,
             }
         else:
             self.path = path
             engine_options = {
-                "pool_size": 10,
-                "max_overflow": 20,
+                'pool_size': 10,
+                'max_overflow': 20,
             }
-            
-        self.db_url = self.get_db_url(self.path)        
+
+        self.db_url = self.get_db_url(self.path)
         self.readonly = readonly
         self.engine = create_engine(
             self.db_url,
@@ -89,21 +91,21 @@ class DB(ObjectFactory):
         return db
 
     @staticmethod
-    def get_default_url():        
-        return DB.get_db_url(".aim")
+    def get_default_url():
+        return DB.get_db_url('.aim')
 
     @staticmethod
     def get_db_url(path: str) -> str:
-        if os.environ.get("AIM_USE_PG", False):
-            pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']        
+        if os.environ.get('AIM_USE_PG', False):
+            pg_dbname = os.environ['AIM_PG_DBNAME_RUNS']
             pg_user = os.environ['AIM_PG_USER']
             pg_password = os.environ['AIM_PG_PASSWORD']
             pg_host = os.environ['AIM_PG_HOST']
             pg_port = os.environ['AIM_PG_PORT']
-            db_url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_dbname}"
+            db_url = f'postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_dbname}'
         else:
-            db_dialect = "sqlite"
-            db_name = "run_metadata.sqlite"
+            db_dialect = 'sqlite'
+            db_name = 'run_metadata.sqlite'
             if os.path.exists(path):
                 db_url = f'{db_dialect}:///{path}/{db_name}'
             else:
