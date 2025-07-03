@@ -9,7 +9,7 @@ from alembic import context
 from alembic.config import Config
 from sqlalchemy import create_engine
 
-import aim.storage.utils.drop_table_cascade  # noqa: F401
+import aim.storage.drop_table_cascade  # noqa: F401
 
 
 # this is the Alembic Config object, which provides

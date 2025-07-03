@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-import aim.storage.utils.drop_table_cascade  # noqa: F401
+import aim.storage.drop_table_cascade  # noqa: F401
 
 engine = create_engine(
     get_db_url(),
