@@ -3,6 +3,7 @@ line-length = 120
 exclude = [
 "migrations",
 "aim_ui_core.py",
+"aim/ext/pynvml.py",
 ]
 [lint.per-file-ignores]
 "__init__.py" = ["F401"]

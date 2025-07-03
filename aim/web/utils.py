@@ -40,14 +40,13 @@ def get_root_path():
 
 
 def get_db_url():
-    if os.environ.get("AIM_USE_PG", False):
+    if os.environ.get('AIM_USE_PG', False):
         pg_user = os.environ['AIM_PG_USER']
         pg_password = os.environ['AIM_PG_PASSWORD']
         pg_host = os.environ['AIM_PG_HOST']
         pg_port = os.environ['AIM_PG_PORT']
         pg_dbname = os.environ['AIM_PG_DBNAME_WEB']
 
-        return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_dbname}"
-    else:        
+        return f'postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_dbname}'
+    else:
         return 'sqlite:///{}/{}/aim_db'.format(get_root_path(), get_aim_repo_name())
-    
