@@ -174,7 +174,7 @@ class Eager4:
             if self.cache is not None and cache_key is not None:
                 self.cache[cache_key] = res
 
-            return res
+        return res
 
 
 class AimObjectProxy(with_metaclass(_ObjectProxyMetaType)):
@@ -192,8 +192,8 @@ class AimObjectProxy(with_metaclass(_ObjectProxyMetaType)):
     def __class__(self):
         return self.__wrapped__().__class__
 
-    @__class__.setter  # noqa
-    def __class__(self, value):  # noqa
+    @__class__.setter
+    def __class__(self, value):
         self.__wrapped__().__class__ = value
 
     @property

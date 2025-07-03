@@ -76,9 +76,13 @@ REQUIRED = [
     'packaging>=15.0',
     'python-dateutil',
     'requests',
+    'watchdog',
     'websockets',
     'boto3',
 ]
+
+if sys.version_info.minor < 9:
+    REQUIRED += ['astunparse']
 
 
 class UploadCommand(Command):
@@ -194,6 +198,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     ext_modules=cytonize_extensions(),

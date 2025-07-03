@@ -1,5 +1,44 @@
 # Changelog
 
+## Unreleased:
+
+### Fixes: 
+- Fix issues with tag false reassignment (mihran113)
+
+## 3.29.1 May 8, 2025:
+
+### Enhancements:
+- Constant indexing of in-progress runs (alberttorosyan)
+- Fallback to union view if index db is missing (alberttorosyan, mihran113)
+
+
+### Fixes:
+- Fix min/max calculation for single point metrics (mihran113)
+- Aim web ui integration in jupyter/colab (larissapoghosyan)
+- Package publishing for Linux/Python 3.7 (alberttorosyan)
+
+## 3.29.0 May 8, 2025 (Yanked)
+
+## 3.28.0 Mar 21, 2025
+
+### Enhancements:
+- Skip metrics check when run is known to yield false result (alberttorosyan)
+- Remove metric version check to improve performance of metric retrieval (mihran113)
+- Move indexing thread to main process of `aim up` (alberttorosyan)
+- Add AimCallback implementation for hugging face distributed runs (VassilisVassiliadis)
+- Add py.typed marker to allow usage of existing type annotations (bluenote10)
+
+
+### Fixes:
+- Decrease client resources keep-alive time (mihran113)
+- Fix connection of data points on epoch alignment (mihran113)
+- Resolve issue with adding duplicate tags to the same run (mihran113)
+- Improve error messages for remote tracking server (mihran113)
+- Fix spurious assertion error in message stream parsing (qzed)
+- Correct indentation on query proxy object return statement (alberttorosyan)
+- Fix typing issues in S3ArtifactStorage implementation (sbatchelder)
+
+
 ## 3.27.0 Dec 18, 2024
 
 ### Enhancements:

@@ -1,3 +1,5 @@
+import logging
+
 from typing import Collection, List, Optional, Union
 
 import pytz
@@ -24,6 +26,9 @@ from sqlalchemy import __version__ as sa_version
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
+
+
+logger = logging.getLogger(__name__)
 
 
 def session_commit_or_flush(session):
@@ -82,11 +87,9 @@ class ModelMappedRun(IRun, metaclass=ModelMappedClassMeta):
 
     @classmethod
     def delete_run(cls, runhash: str, session) -> bool:
-        try:
-            rows_affected = session.query(RunModel).filter(RunModel.hash == runhash).delete()
-            session_commit_or_flush(session)
-        except Exception:
-            return False
+        rows_affected = session.query(RunModel).filter(RunModel.hash == runhash).delete()
+        session_commit_or_flush(session)
+
         return rows_affected > 0
 
     @classmethod
@@ -226,6 +229,10 @@ class ModelMappedRun(IRun, metaclass=ModelMappedClassMeta):
                     session.add(tag)
             self._model.tags.append(tag)
             session.add(self._model)
+
+        if value in self.tags:
+            logger.warning(f'Tag with value: {value} is already present in this run.')
+            return
 
         session = self._session
         unsafe_add_tag()
